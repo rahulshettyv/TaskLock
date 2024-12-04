@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "task_lock"
+version = "0.2.1"
+authors = [
+  { name="Shrijeeth S", email="shrijeethsuresh@gmail.com" },
+]
+description = "Python library designed for efficient distributed locking in asynchronous and synchronous systems."
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    
+]
+
+[tool.setuptools.packages.find]
+include = [""]
+
+[project.urls]
+"Homepage" = "https://github.com/rahulshettyv/TaskLock"
+"Bug Tracker" = "https://github.com/rahulshettyv/TaskLock/issues"
