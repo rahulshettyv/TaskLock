@@ -16,7 +16,8 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "redis>=5.2.0",
+    "redis==5.2.0",
+    "aioredis==2.0.1"
 ]
 
 [project.optional-dependencies]
@@ -24,8 +25,8 @@ dev = [
     "black==24.8.0",
     "pylint==3.2.7",
     "pytest==8.3.2",
-    "pytest-cov==5.0.0",
-    "pytest-asyncio==0.24.0"
+    "pytest-asyncio==0.24.0",
+    "pytest-cov==5.0.0"
 ]
 
 [tool.setuptools.packages.find]
