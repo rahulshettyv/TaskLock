@@ -6,7 +6,7 @@ from functools import wraps
 from typing import Any, Callable, Dict, Literal, Tuple
 import asyncio
 
-import aioredis
+from redis import asyncio as aioredis
 
 from task_lock.utils import generate_lock_name
 
