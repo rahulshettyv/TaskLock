@@ -59,6 +59,6 @@ def critical_section(teamspace_name):
 ```
 
 ## Why TaskLock?
-TaskLock is built for modern distributed systems, offering a robust and developer-friendly API to ensure reliable task execution with minimal overhead.
+TaskLock is built for modern distributed systems, offering a robust and developer-friendly methods to ensure reliable task execution with minimal overhead.
 
 Contribute, star, and follow the project for updates! 🚀
