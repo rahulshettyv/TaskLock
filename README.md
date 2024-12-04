@@ -32,7 +32,7 @@ A robust and high-performance lock implementation using Redis. Ideal for distrib
 ### In-Memory Lock (Coming Soon)
 A lightweight lock for single-machine setups, perfect for testing and local development environments.
 
-### RabbitMQ Lock (Planned)
+### RabbitMQ Lock (Coming Soon)
 Distributed locking using RabbitMQ message queues, suitable for task-based systems.
 
 ### Custom Locks
