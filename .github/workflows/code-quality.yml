@@ -49,6 +49,10 @@ jobs:
               with:
                 python-version: ${{ needs.setup.outputs.python-version }}
             
+            - name: Verify installed packages
+              run: |
+                pip freeze
+            
             - name: Run pylint
               run: |
                   make full-lint
@@ -66,6 +70,10 @@ jobs:
               uses: actions/setup-python@v4
               with:
                 python-version: ${{ needs.setup.outputs.python-version }}
+            
+            - name: Verify installed packages
+              run: |
+                pip freeze
             
             - name: Run unit tests
               run: |
