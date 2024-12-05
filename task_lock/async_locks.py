@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 from functools import wraps
 from typing import Any, Callable, Dict, Literal, Tuple
 import asyncio
+import logging
 
 from redis import asyncio as aioredis
 
@@ -124,17 +125,17 @@ class AsyncRedisLock(AsyncLock):
         Args:
             lock_name (str): The name of the lock to acquire.
         """
-        local_lock = self.local_locks.setdefault(lock_name, asyncio.Lock())
-        async with local_lock:
-            backoff = 0.1
-            while True:
-                is_locked = await self.client.set(
-                    lock_name, "1", nx=True, ex=self.lock_timeout
-                )
-                if is_locked:
-                    return
-                await asyncio.sleep(backoff)
-                backoff = min(backoff * 2, 2)
+        # local_lock = self.local_locks.setdefault(lock_name, asyncio.Lock())
+        # async with local_lock:
+        backoff = 0.1
+        while True:
+            is_locked = await self.client.set(
+                lock_name, "1", nx=True, ex=self.lock_timeout
+            )
+            if is_locked:
+                return
+            await asyncio.sleep(backoff)
+            backoff = min(backoff * 2, 2)
 
     async def release_lock(self, lock_name: str) -> None:
         """
@@ -143,13 +144,19 @@ class AsyncRedisLock(AsyncLock):
         Args:
             lock_name (str): The name of the lock to release.
         """
-        local_lock = self.local_locks.get(lock_name)
-        if local_lock is None:
-            raise ValueError(f"Lock {lock_name} is not acquired.")
-        async with local_lock:
-            lock_value = await self.client.get(lock_name)
-            if lock_value == "1":
-                await self.client.delete(lock_name)
+        # Local Lock is not required in case of Redis
+        # local_lock = self.local_locks.get(lock_name)
+        # print(f"Local lock state for {lock_name}: {local_lock}")
+        # if local_lock is None:
+        #     raise ValueError(f"Lock {lock_name} is not acquired.")
+        # async with local_lock:
+        lock_value = await self.client.get(lock_name)
+        if lock_value is None:
+            logging.warning("Lock %s is not acquired.", lock_name)
+            return
+        lock_value = lock_value.decode("utf-8")
+        if lock_value == "1":
+            await self.client.delete(lock_name)
 
     async def close(self) -> None:
         """

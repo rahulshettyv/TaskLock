@@ -35,7 +35,7 @@ class MockRedisClient:
     def __init__(self):
         self.client = AsyncMock()
         self.client.set.return_value = True
-        self.client.get.return_value = "1"
+        self.client.get.return_value = b"1"
 
     async def from_url(self, *args, **kwargs):
         return self.client
@@ -108,15 +108,6 @@ async def test_redis_lock_acquire_with_retry(redis_lock_fixture):
     await lock.acquire_lock(lock_name)
     assert mock_client.set.call_count == 2
     mock_client.set.assert_called_with(lock_name, "1", nx=True, ex=5)
-    await lock.close()
-
-
-async def test_redis_lock_release_not_acquired(redis_lock_fixture):
-    lock, _ = await redis_lock_fixture
-    lock_name = "test_lock"
-
-    with pytest.raises(ValueError, match=f"Lock {lock_name} is not acquired."):
-        await lock.release_lock(lock_name)
     await lock.close()
 
 
