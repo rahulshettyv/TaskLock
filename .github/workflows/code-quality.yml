@@ -1,0 +1,73 @@
+name: Code Quality Workflow
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+    linting:
+        name: Linting
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout Repository
+              uses: actions/checkout@v3
+            
+            - name: Set up Python
+              uses: actions/setup-python@v4
+              with:
+                python-version: '3.10'
+            
+            - name: Install dependencies
+              run: |
+                  python -m pip install --upgrade pip
+                  pip install -e .[dev]
+            
+            - name: Run pylint
+              run: |
+                  make full-lint
+    
+    unit-testing:
+        name: Unit Testing
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout Repository
+              uses: actions/checkout@v3
+            
+            - name: Set up Python
+              uses: actions/setup-python@v4
+              with:
+                python-version: '3.10'
+            
+            - name: Install dependencies
+              run: |
+                  python -m pip install --upgrade pip
+                  pip install -e .[dev]
+            
+            - name: Run unit tests
+              run: |
+                  make test-report
+              env:
+                PYTHONPATH: ${{ github.workspace }}
+            
+            - name: Check coverage
+              run: |
+                  COVERAGE_THRESHOLD=80
+                  COVERAGE_FILE=coverage/index.html
+
+                  if [ ! -f "$COVERAGE_FILE" ]; then
+                    echo "Coverage file not found: $COVERAGE_FILE"
+                    exit 1
+                  fi
+
+                  CURRENT_COVERAGE=$(awk -F'[<>]' '/<span class="pc_cov">/{print $3}' "$COVERAGE_FILE" | awk '{sub(/%/, ""); print}')
+
+                  echo "Current coverage: $CURRENT_COVERAGE%"
+
+                  if (( $(echo "$CURRENT_COVERAGE < $COVERAGE_THRESHOLD" | bc -l) )); then
+                    echo "Coverage is below threshold. Current coverage: $CURRENT_COVERAGE% , Threshold: $COVERAGE_THRESHOLD%"
+                    exit 1
+                  fi
