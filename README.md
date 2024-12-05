@@ -43,7 +43,7 @@ TaskLock provides a flexible base class (BaseLock) to easily implement your own 
 ### Install TaskLock
 
 ```bash
-pip install tasklock
+pip install git+https://github.com/rahulshettyv/TaskLock.git
 ```
 
 ### Example Usage
@@ -57,6 +57,9 @@ lock = RedisLock(lock_timeout=10)
 def critical_section(teamspace_name):
     print(f"Processing {teamspace_name}")
 ```
+
+### Examples
+Detailed examples are provided in the examples folder of the repository.
 
 ## Why TaskLock?
 TaskLock is built for modern distributed systems, offering a robust and developer-friendly methods to ensure reliable task execution with minimal overhead.
