@@ -49,7 +49,7 @@ pip install git+https://github.com/rahulshettyv/TaskLock.git
 ### Example Usage
 
 ```
-from tasklock import RedisLock # Import other types of Locks as required
+from task_lock import RedisLock # Import other types of Locks as required
 
 lock = RedisLock(lock_timeout=10)
 
