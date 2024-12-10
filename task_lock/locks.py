@@ -148,3 +148,37 @@ class RedisLock(Lock):
         Close the lock.
         """
         self.client.close()
+
+
+class InMemoryLock(Lock):
+    def __init__(self):
+        self.locks = set()
+
+    def acquire_lock(self, lock_name: str) -> None:
+        """
+        Acquire a lock by name. Blocks until the lock is available.
+
+        Args:
+            lock_name (str): The name of the lock to acquire.
+        """
+        backoff = 0.1
+        while lock_name in self.locks:
+            time.sleep(backoff)
+            backoff = min(backoff * 2, 2)
+        self.locks.add(lock_name)
+
+    def release_lock(self, lock_name: str) -> None:
+        """
+        Release a lock by name.
+
+        Args:
+            lock_name (str): The name of the lock to release.
+        """
+        self.locks.discard(lock_name)
+
+    def close(self) -> None:
+        """
+        Close the lock.
+        """
+        self.locks.clear()
+        self.locks = None

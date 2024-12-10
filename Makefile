@@ -1,8 +1,8 @@
 lint:
-	python -m pylint $(shell git ls-files --modified --others '*.py')
+	python -m pylint $(shell git ls-files --modified --others 'task_lock/*.py' 'examples/*.py' 'tests/*.py')
 
 auto-lint:
-	python -m black --safe $(shell git ls-files --modified --others '*.py')
+	python -m black --safe $(shell git ls-files --modified --others 'task_lock/*.py' 'examples/*.py' 'tests/*.py')
 
 full-lint:
 	python -m pylint task_lock
