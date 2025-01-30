@@ -5,6 +5,7 @@ from contextlib import contextmanager
 from functools import wraps
 from typing import Any, Callable, Dict, Literal, Tuple
 import time
+import logging
 
 import redis
 
@@ -37,6 +38,23 @@ class Lock(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    def force_release_lock(
+        self,
+        func: Callable | None,
+        lock_scope: Literal["module", "method", "parameters"],
+        params: Dict[str, Any],
+    ) -> None:
+        """
+        Forcefully release a lock by name.
+
+        Args:
+            func (Optional[Callable]): The function whose lock needs to be force released.
+            lock_scope (Literal['module', 'method', 'parameters']): The scope of the lock.
+            params (Dict[str, Any]): The parameters associated with the lock.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
     def close(self) -> None:
         """
         Close the lock.
@@ -62,7 +80,7 @@ class Lock(ABC):
 
     def _generate_lock_name(
         self,
-        func: Callable,
+        func: Callable | None,
         lock_scope: Literal["module", "method", "parameters"],
         params: Dict[str, Any],
     ) -> str:
@@ -143,6 +161,27 @@ class RedisLock(Lock):
         """
         self.client.delete(lock_name)
 
+    def force_release_lock(
+        self,
+        func: Callable | None,
+        lock_scope: Literal["module", "method", "parameters"],
+        params: Dict[str, Any],
+    ) -> None:
+        """
+        Forcefully release a lock by name.
+
+        Args:
+            func (Optional[Callable]): The function whose lock needs to be force released.
+            lock_scope (Literal['module', 'method', 'parameters']): The scope of the lock.
+            params (Dict[str, Any]): The parameters associated with the lock.
+        """
+        lock_name = self._generate_lock_name(func, lock_scope, params)
+        try:
+            self.client.delete(lock_name)
+            logging.info("Force released lock: %s", lock_name)
+        except Exception as e:
+            logging.error("Failed to force release lock %s: %s", lock_name, str(e))
+
     def close(self) -> None:
         """
         Close the lock.
@@ -174,6 +213,23 @@ class InMemoryLock(Lock):
         Args:
             lock_name (str): The name of the lock to release.
         """
+        self.locks.discard(lock_name)
+
+    def force_release_lock(
+        self,
+        func: Callable | None,
+        lock_scope: Literal["module", "method", "parameters"],
+        params: Dict[str, Any],
+    ) -> None:
+        """
+        Forcefully release a lock by name.
+
+        Args:
+            func (Optional[Callable]): The function whose lock needs to be force released.
+            lock_scope (Literal['module', 'method', 'parameters']): The scope of the lock.
+            params (Dict[str, Any]): The parameters associated with the lock.
+        """
+        lock_name = self._generate_lock_name(func, lock_scope, params)
         self.locks.discard(lock_name)
 
     def close(self) -> None:

@@ -38,6 +38,23 @@ class AsyncLock(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    async def force_release_lock(
+        self,
+        func: Callable | None,
+        lock_scope: Literal["module", "method", "parameters"],
+        params: Dict[str, Any],
+    ) -> None:
+        """
+        Forcefully release a lock by name.
+
+        Args:
+            func (Optional[Callable]): The function whose lock needs to be force released.
+            lock_scope (Literal['module', 'method', 'parameters']): The scope of the lock.
+            params (Dict[str, Any]): The parameters associated with the lock.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
     async def close(self) -> None:
         """
         Close the lock.
@@ -63,7 +80,7 @@ class AsyncLock(ABC):
 
     def _generate_lock_name(
         self,
-        func: Callable,
+        func: Callable | None,
         lock_scope: Literal["module", "method", "parameters"],
         params: Dict[str, Any],
     ) -> str:
@@ -157,6 +174,27 @@ class AsyncRedisLock(AsyncLock):
         lock_value = lock_value.decode("utf-8")
         if lock_value == "1":
             await self.client.delete(lock_name)
+
+    async def force_release_lock(
+        self,
+        func: Callable | None,
+        lock_scope: Literal["module", "method", "parameters"],
+        params: Dict[str, Any],
+    ) -> None:
+        """
+        Forcefully release a lock by name.
+
+        Args:
+            func (Optional[Callable]): The function whose lock needs to be force released.
+            lock_scope (Literal['module', 'method', 'parameters']): The scope of the lock.
+            params (Dict[str, Any]): The parameters associated with the lock.
+        """
+        lock_name = self._generate_lock_name(func, lock_scope, params)
+        try:
+            await self.client.delete(lock_name)
+            logging.info("Force released lock: %s", lock_name)
+        except Exception as e:
+            logging.error("Failed to force release lock %s: %s", lock_name, str(e))
 
     async def close(self) -> None:
         """
