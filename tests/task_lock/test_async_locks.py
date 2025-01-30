@@ -1,6 +1,5 @@
-# pylint: disable=unused-argument,too-few-public-methods,redefined-outer-name,unused-variable
-
 from unittest.mock import AsyncMock, patch
+from typing import Any, Callable, Dict, Literal
 import asyncio
 
 import pytest
@@ -21,6 +20,14 @@ class MockAsyncLock(AsyncLock):
 
     async def release_lock(self, lock_name: str) -> None:
         self.locks.remove(lock_name)
+
+    async def force_release_lock(
+        self,
+        func: Callable | None,
+        lock_scope: Literal["module", "method", "parameters"],
+        params: Dict[str, Any],
+    ) -> None:
+        self.locks.discard(lock_name)
 
     async def close(self) -> None:
         self.locks.clear()

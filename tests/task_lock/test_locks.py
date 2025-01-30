@@ -1,6 +1,5 @@
-# pylint: disable=unused-argument,too-few-public-methods,redefined-outer-name,unused-variable
-
 from unittest.mock import MagicMock, patch
+from typing import Any, Callable, Dict, Literal
 import threading
 import time
 
@@ -21,6 +20,14 @@ class MockLock(Lock):
 
     def release_lock(self, lock_name: str) -> None:
         self.locks.remove(lock_name)
+
+    def force_release_lock(
+        self,
+        func: Callable | None,
+        lock_scope: Literal["module", "method", "parameters"],
+        params: Dict[str, Any],
+    ):
+        self.locks.discard(lock_name)
 
     def close(self) -> None:
         self.locks.clear()
